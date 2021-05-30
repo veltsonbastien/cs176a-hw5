@@ -24,11 +24,36 @@ void delay(int number_of_seconds) {
 }
 
 char * sumOfDigits(char * bufferCopy) {
-return 0; 
+  int total = 0;
+  /* Do a linear add of the numbers that come in only if they are digits */
+  for (int i = 0; i < strlen(bufferCopy); i++) {
+    char currentChar = bufferCopy[i];
+    if ((currentChar >= '0' && currentChar <= '9')) {
+      total += (currentChar) - '0';
+    } else { 
+      //This will return a letter to signify letters were found:
+      char * result = malloc(2);
+      result[0] = 'a';
+      result[1] = '\0';
+      return result;
+    }
+  }
+  //Converting int to char*, with answer inspired from: 
+  //https://stackoverflow.com/questions/8257714/how-to-convert-an-int-to-string-in-c
+  if (strlen(bufferCopy) > 0) { 
+    //Only output result if string isn't empty and doesn't have letters:
+    int strLength = snprintf(NULL, 0, "%d", total);
+    char * result = malloc(strLength + 1);
+    snprintf(result, strLength + 1, "%d", total);
+    return result;
+  }
+  char * result = malloc(2);
+  result[0] = 'a';
+  result[1] = '\0';
+  return result;
 }
 
 int main(int argc, char * argv[]) {
-
 //SETTING UP THE GAME: 
 //First, read in the file (code taken from https://stackoverflow.com/questions/3501338/c-read-file-line-by-line): 
 FILE * fp;
@@ -49,7 +74,10 @@ while ((readin = getline(&line, &len, fp)) != -1) {
 
 //At this point, all words are loaded into wordsToGuess, and this can be randomly indexed later. 
 
-//Now, we begin listening for the client
+int amountOfGames = 0; //have a variable keeping track of the amount of connections 
+
+
+//Now, we begin listening for the client and setting all that up
   int sockfd, newsockfd, portno;
   socklen_t clilen;
   char buffer[256];
@@ -72,6 +100,8 @@ while ((readin = getline(&line, &len, fp)) != -1) {
     error("ERROR on binding");
   listen(sockfd, 5);
   clilen = sizeof(cli_addr);
+  //AT THIS POINT EVERYTING FOR SETTING UP THE CONNECTION IS DONE, WE ARE NOW LISTENING FOR A CONNECTION TO START THE GAME
+
   while (1) { //This will allow for the TCP connection to remain open
     newsockfd = accept(sockfd,
       (struct sockaddr * ) & cli_addr, &
@@ -81,27 +111,34 @@ while ((readin = getline(&line, &len, fp)) != -1) {
     bzero(buffer, 256);
     n = read(newsockfd, buffer, 255);
     if (n < 0) error("ERROR reading from socket");
-    buffer[strlen(buffer) - 1] = '\0'; //Clean up buffer
-    //Get sum: 
-    char * returnMessage = sumOfDigits(buffer);
-    if (returnMessage[0] != 'a') {
-      int lengthOfMessage = strlen(returnMessage);
-      delay(2000); //Delay is necessary to ensure proper spacing of text
-      n = write(newsockfd, returnMessage, lengthOfMessage);
-      if (n < 0) error("ERROR writing to socket");
-      while (lengthOfMessage > 1) { 
-        //Continue to write while the message length is greater than 1
-        returnMessage = sumOfDigits(returnMessage);
-        lengthOfMessage = strlen(returnMessage);
-        delay(2000); //Delay is necessary to esnure proper spacing of text
-        n = write(newsockfd, returnMessage, lengthOfMessage);
-        if (n < 0) error("ERROR writing to socket");
-      }
+    //buffer[strlen(buffer) - 1] = '\0'; //Clean up buffer
+    
+    //This keeps track of the amount of games: 
+    if(amountOfGames == 3){ //if more than 3 games, print error and close conection 
+        n = write(newsockfd, "server-overloaded", 17);
     } else {
-      //Output the error message if letters or empty space is found
-      n = write(newsockfd, "Sorry, cannot compute!", 22);
-      if (n < 0) error("ERROR writing to socket");
+        amountOfGames++; 
     }
+
+    // char * returnMessage = sumOfDigits(buffer);
+    // if (returnMessage[0] != 'a') {
+    //   int lengthOfMessage = strlen(returnMessage);
+    //   delay(2000); //Delay is necessary to ensure proper spacing of text
+    //   n = write(newsockfd, returnMessage, lengthOfMessage);
+    //   if (n < 0) error("ERROR writing to socket");
+    //   while (lengthOfMessage > 1) { 
+    //     //Continue to write while the message length is greater than 1
+    //     returnMessage = sumOfDigits(returnMessage);
+    //     lengthOfMessage = strlen(returnMessage);
+    //     delay(2000); //Delay is necessary to esnure proper spacing of text
+    //     n = write(newsockfd, returnMessage, lengthOfMessage);
+    //     if (n < 0) error("ERROR writing to socket");
+    //   }
+    // } else {
+    //   //Output the error message if letters or empty space is found
+    //   n = write(newsockfd, "Sorry, cannot compute!", 22);
+    //   if (n < 0) error("ERROR writing to socket");
+    // }
     //Close connection: 
     close(newsockfd);
   }

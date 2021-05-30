@@ -49,18 +49,23 @@ int main(int argc, char * argv[]) {
     serv_addr.sin_port = htons(portno);
     if (connect(sockfd, (struct sockaddr * ) & serv_addr, sizeof(serv_addr)) < 0)
         error("ERROR connecting");
-    bzero(buffer, 256);
-    fgets(buffer, 255, stdin);
-    n = write(sockfd, buffer, strlen(buffer));
-    if (n < 0)
-        error("ERROR writing to socket");
+
+   bzero(buffer, 256);
+    //AT THIS POINT, EVERYTHING FOR CONNECTION HAS BEEN ESTABLISHED, send over the 0 message to the server  
+    // fgets(buffer, 255, stdin);
+    n = write(sockfd, "0", 1);
+    // if (n < 0)
+    //     error("ERROR writing to socket");
     bzero(buffer, 256);
     n = read(sockfd, buffer, 255);
     if (n < 0) error("ERROR reading from socket");
     while (strlen(buffer) > 0) { 
         //Continue to print messages from server while we are still reading from it:
-        printf("%s", "From server: ");
         printf("%s\n", buffer);
+        if(strcmp(buffer, "server-overloaded") == 0){ //If the message is an overload error, end the connection
+         close(sockfd);
+         return 0 ;
+        }
         bzero(buffer, 256);
         n = read(sockfd, buffer, 255);
         if (n < 0) error("ERROR reading from socket");
