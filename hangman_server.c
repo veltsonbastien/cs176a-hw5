@@ -24,7 +24,6 @@ void delay(int number_of_seconds) {
   ;
 }
 
-
 char* generateSpaces (int amountOfSpaces){
     char* spaces = malloc(amountOfSpaces+1);
     for(int i = 0; i < amountOfSpaces; i++){
@@ -105,13 +104,15 @@ int amountOfGames = 0; //have a variable keeping track of the amount of connecti
         int r = rand() % 10; //should be a number between 1 and 10 (taken from https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c)
         char* guessThis = wordsToGuess[r];
         char* spaces = generateSpaces(strlen(guessThis)-2); //accounting for strlen() miscount
-        //n = write(newsockfd, guessThis, strlen(guessThis));
-        n = write(newsockfd, spaces, strlen(spaces)); //prints out the spaces
+        strcpy(buffer,"0"); //add in 0 as the flag to buffer;
+        strcat(buffer, spaces); //add in the spaces
+        strcat(buffer, "\n"); //add in a space
+        strcat(buffer, "Incorrect Guesses: \n"); //add in second line 
+        n = write(newsockfd, buffer, strlen(buffer)); //prints out the spaces
+        bzero(buffer, 256);
     }
 
     
-
-
     //Close connection: 
     close(newsockfd);
   }

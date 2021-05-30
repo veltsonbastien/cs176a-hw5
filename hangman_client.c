@@ -54,18 +54,23 @@ int main(int argc, char * argv[]) {
     //AT THIS POINT, EVERYTHING FOR CONNECTION HAS BEEN ESTABLISHED, send over the 0 message to the server  
     // fgets(buffer, 255, stdin);
     n = write(sockfd, "0", 1);
-    // if (n < 0)
-    //     error("ERROR writing to socket");
+    if (n < 0) error("ERROR writing to socket");
     bzero(buffer, 256);
     n = read(sockfd, buffer, 255);
     if (n < 0) error("ERROR reading from socket");
     while (strlen(buffer) > 0) { 
-        //Continue to print messages from server while we are still reading from it:
-        printf("%s\n", buffer);
         if(strcmp(buffer, "server-overloaded") == 0){ //If the message is an overload error, end the connection
          close(sockfd);
-         return 0 ;
+         return 0;
         }
+        //If runtime continues, now check the flag:
+        if(buffer[0] == '0'){
+            //in this case, we know we are still running game logic 
+            memmove(buffer, buffer+1, strlen(buffer)); //inspired from: https://stackoverflow.com/questions/4295754/how-to-remove-first-character-from-c-string
+            printf("%s\n", buffer);
+        } 
+
+
         bzero(buffer, 256);
         //keep on reading from buffer;
         n = read(sockfd, buffer, 255);
