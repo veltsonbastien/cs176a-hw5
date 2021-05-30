@@ -58,6 +58,7 @@ int main(int argc, char * argv[]) {
     bzero(buffer, 256);
     n = read(sockfd, buffer, 255);
     if (n < 0) error("ERROR reading from socket");
+    //While there is still something to read on the buffer:
     while (strlen(buffer) > 0) { 
         if(strcmp(buffer, "server-overloaded") == 0){ //If the message is an overload error, end the connection
          close(sockfd);
@@ -67,11 +68,12 @@ int main(int argc, char * argv[]) {
         if(buffer[0] == '0'){
             //in this case, we know we are still running game logic 
             memmove(buffer, buffer+1, strlen(buffer)); //inspired from: https://stackoverflow.com/questions/4295754/how-to-remove-first-character-from-c-string
-            printf("%s\n", buffer);
-        } 
-
-
-        bzero(buffer, 256);
+            printf("%s\n", buffer); //print out the buffer 
+            bzero(buffer, 256); // zero out the buffer 
+            printf("Letter to guess: "); 
+            fgets(buffer, 255, stdin); //get the guess from user input 
+            n = write(sockfd, buffer, strlen(buffer)); //send it back to server
+        }     
         //keep on reading from buffer;
         n = read(sockfd, buffer, 255);
         if (n < 0) error("ERROR reading from socket");
