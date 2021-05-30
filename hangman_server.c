@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <memory.h>
 #include <time.h>
 
 void error(const char * msg) {
@@ -23,34 +24,13 @@ void delay(int number_of_seconds) {
   ;
 }
 
-char * sumOfDigits(char * bufferCopy) {
-  int total = 0;
-  /* Do a linear add of the numbers that come in only if they are digits */
-  for (int i = 0; i < strlen(bufferCopy); i++) {
-    char currentChar = bufferCopy[i];
-    if ((currentChar >= '0' && currentChar <= '9')) {
-      total += (currentChar) - '0';
-    } else { 
-      //This will return a letter to signify letters were found:
-      char * result = malloc(2);
-      result[0] = 'a';
-      result[1] = '\0';
-      return result;
+
+char* generateSpaces (int amountOfSpaces){
+    char* spaces = malloc(amountOfSpaces+1);
+    for(int i = 0; i < amountOfSpaces; i++){
+        spaces[i] = '_';
     }
-  }
-  //Converting int to char*, with answer inspired from: 
-  //https://stackoverflow.com/questions/8257714/how-to-convert-an-int-to-string-in-c
-  if (strlen(bufferCopy) > 0) { 
-    //Only output result if string isn't empty and doesn't have letters:
-    int strLength = snprintf(NULL, 0, "%d", total);
-    char * result = malloc(strLength + 1);
-    snprintf(result, strLength + 1, "%d", total);
-    return result;
-  }
-  char * result = malloc(2);
-  result[0] = 'a';
-  result[1] = '\0';
-  return result;
+    return spaces;
 }
 
 int main(int argc, char * argv[]) {
@@ -68,14 +48,13 @@ if (fp == NULL)
 char wordsToGuess[10][14]; //allocated for the words in the file 
 unsigned int indexer = 0; 
 while ((readin = getline(&line, &len, fp)) != -1) {
-    strcpy(wordsToGuess[indexer], line);
+    strcpy(wordsToGuess[indexer], line+'\0');
     indexer++; //increase indexer to move to next spot
 } 
 
 //At this point, all words are loaded into wordsToGuess, and this can be randomly indexed later. 
 
 int amountOfGames = 0; //have a variable keeping track of the amount of connections 
-
 
 //Now, we begin listening for the client and setting all that up
   int sockfd, newsockfd, portno;
@@ -102,7 +81,8 @@ int amountOfGames = 0; //have a variable keeping track of the amount of connecti
   clilen = sizeof(cli_addr);
   //AT THIS POINT EVERYTING FOR SETTING UP THE CONNECTION IS DONE, WE ARE NOW LISTENING FOR A CONNECTION TO START THE GAME
 
-  while (1) { //This will allow for the TCP connection to remain open
+ //This will allow for the TCP connection to remain open:
+  while (1) { 
     newsockfd = accept(sockfd,
       (struct sockaddr * ) & cli_addr, &
       clilen);
@@ -112,33 +92,26 @@ int amountOfGames = 0; //have a variable keeping track of the amount of connecti
     n = read(newsockfd, buffer, 255);
     if (n < 0) error("ERROR reading from socket");
     //buffer[strlen(buffer) - 1] = '\0'; //Clean up buffer
-    
+
     //This keeps track of the amount of games: 
     if(amountOfGames == 3){ //if more than 3 games, print error and close conection 
         n = write(newsockfd, "server-overloaded", 17);
     } else {
-        amountOfGames++; 
+        amountOfGames++; //else, increment the amount of games      
+        //NOW BEGIN THE GAME LOGIC:
+        //First, choose a word: 
+        //Also, make sure there's a random seed for the random int generator: 
+        srand(time(NULL));
+        int r = rand() % 10; //should be a number between 1 and 10 (taken from https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c)
+        char* guessThis = wordsToGuess[r];
+        char* spaces = generateSpaces(strlen(guessThis)-2); //accounting for strlen() miscount
+        //n = write(newsockfd, guessThis, strlen(guessThis));
+        n = write(newsockfd, spaces, strlen(spaces)); //prints out the spaces
     }
 
-    // char * returnMessage = sumOfDigits(buffer);
-    // if (returnMessage[0] != 'a') {
-    //   int lengthOfMessage = strlen(returnMessage);
-    //   delay(2000); //Delay is necessary to ensure proper spacing of text
-    //   n = write(newsockfd, returnMessage, lengthOfMessage);
-    //   if (n < 0) error("ERROR writing to socket");
-    //   while (lengthOfMessage > 1) { 
-    //     //Continue to write while the message length is greater than 1
-    //     returnMessage = sumOfDigits(returnMessage);
-    //     lengthOfMessage = strlen(returnMessage);
-    //     delay(2000); //Delay is necessary to esnure proper spacing of text
-    //     n = write(newsockfd, returnMessage, lengthOfMessage);
-    //     if (n < 0) error("ERROR writing to socket");
-    //   }
-    // } else {
-    //   //Output the error message if letters or empty space is found
-    //   n = write(newsockfd, "Sorry, cannot compute!", 22);
-    //   if (n < 0) error("ERROR writing to socket");
-    // }
+    
+
+
     //Close connection: 
     close(newsockfd);
   }
