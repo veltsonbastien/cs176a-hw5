@@ -24,58 +24,32 @@ void delay(int number_of_seconds) {
 }
 
 char * sumOfDigits(char * bufferCopy) {
-  int total = 0;
-  /* Do a linear add of the numbers that come in only if they are digits */
-  for (int i = 0; i < strlen(bufferCopy); i++) {
-    char currentChar = bufferCopy[i];
-    if ((currentChar >= '0' && currentChar <= '9')) {
-      total += (currentChar) - '0';
-    } else { 
-      //This will return a letter to signify letters were found:
-      char * result = malloc(2);
-      result[0] = 'a';
-      result[1] = '\0';
-      return result;
-    }
-  }
-  //Converting int to char*, with answer inspired from: 
-  //https://stackoverflow.com/questions/8257714/how-to-convert-an-int-to-string-in-c
-  if (strlen(bufferCopy) > 0) { 
-    //Only output result if string isn't empty and doesn't have letters:
-    int strLength = snprintf(NULL, 0, "%d", total);
-    char * result = malloc(strLength + 1);
-    snprintf(result, strLength + 1, "%d", total);
-    return result;
-  }
-  char * result = malloc(2);
-  result[0] = 'a';
-  result[1] = '\0';
-  return result;
+return 0; 
 }
 
 int main(int argc, char * argv[]) {
 
-  //SETTING UP THE GAME: 
-  //First, read in the file (code taken from https://stackoverflow.com/questions/3501338/c-read-file-line-by-line): 
-    FILE * fp;
-    char * line = NULL;
-    size_t len = 0;
-    ssize_t readin;
+//SETTING UP THE GAME: 
+//First, read in the file (code taken from https://stackoverflow.com/questions/3501338/c-read-file-line-by-line): 
+FILE * fp;
+char * line = NULL;
+size_t len = 0;
+ssize_t readin;
 
-    fp = fopen("hangman_words.txt", "r");
-    if (fp == NULL)
-        exit(EXIT_FAILURE);
+fp = fopen("hangman_words.txt", "r");
+if (fp == NULL)
+    exit(EXIT_FAILURE);
 
-    
-    char wordsToGuess[10][14]; //allocated for the words in the file 
-    unsigned int indexer = 0; 
-    while ((readin = getline(&line, &len, fp)) != -1) {
-        strcpy(wordsToGuess[indexer], line);
-        indexer++; //increase indexer to move to next spot
-    } 
+char wordsToGuess[10][14]; //allocated for the words in the file 
+unsigned int indexer = 0; 
+while ((readin = getline(&line, &len, fp)) != -1) {
+    strcpy(wordsToGuess[indexer], line);
+    indexer++; //increase indexer to move to next spot
+} 
 
-  
+//At this point, all words are loaded into wordsToGuess, and this can be randomly indexed later. 
 
+//Now, we begin listening for the client
   int sockfd, newsockfd, portno;
   socklen_t clilen;
   char buffer[256];
