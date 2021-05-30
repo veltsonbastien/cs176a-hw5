@@ -14,6 +14,19 @@ void error(const char * msg) {
   exit(0);
 }
 
+//Delay code inspired from: https://www.geeksforgeeks.org/time-delay-c/
+void delay(int number_of_seconds) {
+    // Converting time into milli_seconds
+    int milli_seconds = 1000 * number_of_seconds;
+  
+    // Storing start time
+    clock_t start_time = clock();
+  
+    // looping till required time is not achieved
+    while (clock() < start_time + milli_seconds)
+        ;
+}
+
 int main(int argc, char * argv[]) {
 
   //First thing, Client asks if user wants to join game: 
@@ -71,9 +84,12 @@ int main(int argc, char * argv[]) {
             printf("%s\n", buffer); //print out the buffer 
             bzero(buffer, 256); // zero out the buffer 
             printf("Letter to guess: "); 
-            fgets(buffer, 255, stdin); //get the guess from user input 
+            scanf("%s", buffer); //get the guess from user input 
             n = write(sockfd, buffer, strlen(buffer)); //send it back to server
-        }     
+        } 
+        else if(buffer[0] == '9'){ //then we know we got a game over 
+
+        }    
         //keep on reading from buffer;
         n = read(sockfd, buffer, 255);
         if (n < 0) error("ERROR reading from socket");

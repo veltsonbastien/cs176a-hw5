@@ -33,15 +33,19 @@ char* generateSpaces (int amountOfSpaces){
     return spaces;
 }
 
-void checkLetter (char givenLetter, char* guessThis, char** spaces, char** incorrectlettersArray){
+void checkLetter (char givenLetter, char* guessThis, char** spaces, char** incorrectlettersArray, int* amountOfGuesses){
+    if(*amountOfGuesses >= 6) return;
     int changed = 0;
-    for(int i = 0; i < (strlen(guessThis)-2); i++){
+    for(int i = 0; i < (strlen(*spaces) - 2); i++){
         if(givenLetter == guessThis[i]){ //this is the right letter at the right space
             *spaces[i]=givenLetter; //set that place to given letter
             changed = 1; //set flag to true;
         }
     }
-    if(changed == 0) incorrectlettersArray+=givenLetter; // if not changed that means letter is wrong, add to incorrect letters
+    if(changed == 0){
+      strncat(*incorrectlettersArray, &givenLetter, 1);
+      *amountOfGuesses = *amountOfGuesses+1; //update the amount of guesses
+    }
 }
 
 int main(int argc, char * argv[]) {
@@ -66,6 +70,7 @@ while ((readin = getline(&line, &len, fp)) != -1) {
 //At this point, all words are loaded into wordsToGuess, and this can be randomly indexed later. 
 
 int amountOfGames = 0; //have a variable keeping track of the amount of connections 
+int amountOfGuesses = 0; //have a variable keeping track of guesses per client
 
 //Now, we begin listening for the client and setting all that up
   int sockfd, newsockfd, portno;
@@ -100,63 +105,75 @@ int amountOfGames = 0; //have a variable keeping track of the amount of connecti
     if (newsockfd < 0)
       error("ERROR on accept");
     bzero(buffer, 256);
-    n = read(newsockfd, buffer, 255);
+    n = read(newsockfd, buffer, 255); //read in from the new connection, expecting a "0" to start the game
     if (n < 0) error("ERROR reading from socket");
     //buffer[strlen(buffer) - 1] = '\0'; //Clean up buffer
+    if(buffer[0] == '0'){ //only start the game once you got that 
+      //This keeps track of the amount of games: 
+      if(amountOfGames == 3){ //if more than 3 games, print error and close conection 
+          n = write(newsockfd, "server-overloaded", 17);
+      } else {
+          amountOfGames++; //else, increment the amount of games      
+          //NOW BEGIN THE GAME LOGIC:
+          //First, choose a word: 
+          //Also, make sure there's a random seed for the random int generator: 
+          srand(time(NULL));
+        // int r = rand() % 10; //should be a number between 1 and 10 (taken from https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c)
+          char* guessThis = wordsToGuess[0];
+          char* spaces = generateSpaces(strlen(guessThis)); //accounting for strlen() miscount
+         // strcpy(buffer,"0"); //add in 0 as the flag to buffer;
+          // strcat(buffer, spaces); //add in the spaces
+          // strcat(buffer, "\n"); //add in a space
+          // strcat(buffer, "Incorrect Guesses: \n"); //add in second line 
+          //n = write(newsockfd, buffer, strlen(buffer)); //prints out the spaces
+          //bzero(buffer, 256);
 
-    //This keeps track of the amount of games: 
-    if(amountOfGames == 3){ //if more than 3 games, print error and close conection 
-        n = write(newsockfd, "server-overloaded", 17);
-    } else {
-        amountOfGames++; //else, increment the amount of games      
-        //NOW BEGIN THE GAME LOGIC:
-        //First, choose a word: 
-        //Also, make sure there's a random seed for the random int generator: 
-        srand(time(NULL));
-        int r = rand() % 10; //should be a number between 1 and 10 (taken from https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c)
-        char* guessThis = wordsToGuess[r];
-        char* spaces = generateSpaces(strlen(guessThis)-2); //accounting for strlen() miscount
-        strcpy(buffer,"0"); //add in 0 as the flag to buffer;
-        strcat(buffer, spaces); //add in the spaces
-        strcat(buffer, "\n"); //add in a space
-        strcat(buffer, "Incorrect Guesses: \n"); //add in second line 
-        n = write(newsockfd, buffer, strlen(buffer)); //prints out the spaces
-        bzero(buffer, 256);
-
-        //Now we want to read input from user:
-        delay(1000);
-        n = read(newsockfd, buffer, 255);
-        if (n < 0) error("ERROR reading from socket first one");
-        //Have an incorrectLettersArray to keep track of wrong guesses: 
-        char* incorrectlettersArray = malloc(7); //because 6 max wrong guesses
-        //While there is still something to read on the buffer:
-        while (strlen(buffer) > 0) { 
-         //be prepared to send out errors in case of it being wrong
-         if( isalpha(buffer[0]) && strlen(buffer) == 2 ){
-             //check if the given letter is correct or not
-             checkLetter(buffer[0], guessThis, &spaces, &incorrectlettersArray);
-             bzero(buffer, 256); //clear buffer before writing 
-             strcpy(buffer,"0"); //add in 0 as the flag to buffer;
-             strcat(buffer, spaces); //add in the spaces
-             strcat(buffer, "\n"); //add in a space
-             strcat(buffer, "Incorrect Guesses: "); //add in second line 
-             strcat(buffer, incorrectlettersArray); //add in incorrect guesses
-             strcat(buffer, "\n");
-             n = write(newsockfd, buffer, strlen(buffer)); //prints out the spaces
-             bzero(buffer, 256);
-         } else {
-             bzero(buffer, 256); //clear buffer before writing 
-             strcpy(buffer,"0"); //add in 0 as the flag to buffer;
-             strcat(buffer, "Error! Please guess one letter."); //add in the error message
-             strcat(buffer, "\n"); //add in a space
-             n = write(newsockfd, buffer, strlen(buffer)); //prints out the spaces
-             bzero(buffer, 256); //clear out buffer after writing
-         }
-        //Continue reading: 
-         delay(1000);
-         n = read(newsockfd, buffer, 255);
-         if (n < 0) error("ERROR reading from socket in inner while loop");
-        }
+          //Have an incorrectLettersArray to keep track of wrong guesses: 
+          char* incorrectlettersArray = malloc(7); //because 6 max wrong guesses
+          //While there is still something to read on the buffer:
+          while (strlen(buffer) > 0) { 
+            //check how many (incorrect) guesses they are on 
+            if(amountOfGuesses == 6){
+              //we want to end the game and close the connection 
+              bzero(buffer, 256); //clear buffer before writing
+              strcpy(buffer,"9"); //add in 9 as the flag to buffer; to signify game over 
+              strcat(buffer,"The word was ");
+              strcat(buffer, guessThis); 
+              strcat(buffer,"\n"); //add in a space
+              strcat(buffer,"You Lose."); //add in the game over message;
+              strcat(buffer,"\n"); //add in a line break
+              strcat(buffer,"Game Over!"); //add in the game over message;
+              n = write(newsockfd, buffer, strlen(buffer)); //write out game over 
+              bzero(buffer, 256); 
+            }
+          //be prepared to send out errors in case of it being wrong
+          // else if( (isalpha(buffer[0]) || strlen(buffer) <= 2) ){
+            else if( 1 == 2){
+              bzero(buffer, 256); //clear buffer before writing 
+              strcpy(buffer,"0"); //add in 0 as the flag to buffer;
+              strcat(buffer, "Error! Please guess one letter."); //add in the error message
+              strcat(buffer, "\n"); //add in a space
+              n = write(newsockfd, buffer, strlen(buffer)); //prints out the spaces
+              bzero(buffer, 256); //clear out buffer after writing
+          } else {
+                //check if the given letter is correct or not
+              //checkLetter(buffer[0], guessThis, &spaces, &incorrectlettersArray, &amountOfGuesses);
+              bzero(buffer, 256); //clear buffer before writing 
+              strcpy(buffer,"0"); //add in 0 as the flag to buffer;
+              strcat(buffer, spaces); //add in the spaces
+              strcat(buffer, "\n"); //add in a space
+              strcat(buffer, "Incorrect Guesses: "); //add in second line 
+             // strcat(buffer, incorrectlettersArray); //add in incorrect guesses
+              strcat(buffer, "\n");
+              n = write(newsockfd, buffer, strlen(buffer)); //prints out the spaces
+              bzero(buffer, 256);
+          }
+          //Continue reading: 
+          delay(1000);
+          n = read(newsockfd, buffer, 255);
+          if (n < 0) error("ERROR reading from socket in inner while loop");
+          }
+      } //end of else for amount of games
     }
     
     //Close connection: 
