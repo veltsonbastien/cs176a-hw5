@@ -62,10 +62,10 @@ fp = fopen("hangman_words.txt", "r");
 if (fp == NULL)
     exit(EXIT_FAILURE);
 
-char wordsToGuess[10][14]; //allocated for the words in the file 
+char wordsToGuess[15][14]; //allocated for the words in the file 
 unsigned int indexer = 0; 
 while ((readin = getline(&line, &len, fp)) != -1) {
-    line[strlen(line)-2] = '\0'; //clean up line
+    if(line[strlen(line)-1] == '\n') line[strlen(line)-2] = '\0'; //clean up line to remove newline character if more than one line
     strcpy(wordsToGuess[indexer], line);
     indexer++; //increase indexer to move to next spot
 } 
@@ -121,7 +121,7 @@ int amountOfGuesses = 1; //have a variable keeping track of guesses per client
           //First, choose a word: 
           //Also, make sure there's a random seed for the random int generator: 
           srand(time(NULL)); // generate a new seed for the random when a connection start
-          int r = rand() % 10; //should be a number between 1 and 10 (taken from https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c)
+          int r = rand() % indexer; //should be a number between 1 and indexer amount (taken from https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c)
           char* guessThis = wordsToGuess[r];
           char* spaces = generateSpaces(strlen(guessThis)); //accounting for strlen() miscount
           //Have an incorrectLettersArray to keep track of wrong guesses: 
