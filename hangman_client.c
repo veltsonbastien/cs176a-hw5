@@ -103,6 +103,13 @@ int main(int argc, char * argv[]) {
             close(sockfd); //end the connection
             return 0; //end the program
         }    
+        if(buffer[0] == '9'){ 
+            //in this case we know that we have lost
+            memmove(buffer, buffer+1, strlen(buffer)); //inspired from: https://stackoverflow.com/questions/4295754/how-to-remove-first-character-from-c-string
+            printf("%s\n", buffer); //print out the buffer 
+            close(sockfd); //end the connection
+            return 0; //end the program
+        } 
         //keep on reading from buffer;
         n = read(sockfd, buffer, 255);
         if (n < 0) error("ERROR reading from socket");

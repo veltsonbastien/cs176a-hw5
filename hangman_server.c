@@ -33,20 +33,20 @@ char* generateSpaces (int amountOfSpaces){
     return spaces;
 }
 
-void checkLetter (char givenLetter, char* guessThis, char* spaces){
-    //if(*amountOfGuesses >= 6) return;
-    //int changed = 0;
+void checkLetter (char givenLetter, char* guessThis, char* spaces, char* incorrectlettersArray, int* amountOfGuesses){
+    if(*amountOfGuesses >= 6) return;
+    int changed = 0;
     for(int i = 0; i < (strlen(spaces)); i++){
         if(givenLetter == guessThis[i]){ //this is the right letter at the right space
             spaces[i]=givenLetter; //set that place to given letter
-            //changed = 1; //set flag to true;
+            changed = 1; //set flag to true;
         }
     }
-
-   // if(changed == 0){
-    //  strncat(*incorrectlettersArray, &givenLetter, 1);
-    //  *amountOfGuesses = *amountOfGuesses+1; //update the amount of guesses
-   // }
+   //if not changed, that means this letter was wrong so we add it to the wrong letters list
+   if(changed == 0){
+     strncat(incorrectlettersArray, &givenLetter, 1);
+     *amountOfGuesses = *amountOfGuesses+1; //update the amount of guesses
+   }
 }
 
 int main(int argc, char * argv[]) {
@@ -71,7 +71,7 @@ while ((readin = getline(&line, &len, fp)) != -1) {
 //At this point, all words are loaded into wordsToGuess, and this can be randomly indexed later. 
 
 int amountOfGames = 0; //have a variable keeping track of the amount of connections 
-//int amountOfGuesses = 0; //have a variable keeping track of guesses per client
+int amountOfGuesses = 1; //have a variable keeping track of guesses per client
 
 //Now, we begin listening for the client and setting all that up
   int sockfd, newsockfd, portno;
@@ -123,12 +123,11 @@ int amountOfGames = 0; //have a variable keeping track of the amount of connecti
           char* guessThis = wordsToGuess[0];
           char* spaces = generateSpaces(strlen(guessThis)); //accounting for strlen() miscount
           //Have an incorrectLettersArray to keep track of wrong guesses: 
-          //char* incorrectlettersArray = malloc(7); //because 6 max wrong guesses
+          char* incorrectlettersArray = malloc(7); //because 6 max wrong guesses
           //While there is still something to read on the buffer:
           while (strlen(buffer) > 0) { 
             //check how many (incorrect) guesses they are on 
-            //if(amountOfGuesses == 6){
-            if( 1 == 2){
+            if(amountOfGuesses == 6){
               //we want to end the game and close the connection 
               bzero(buffer, 256); //clear buffer before writing
               strcpy(buffer,"9"); //add in 9 as the flag to buffer; to signify game over 
@@ -142,7 +141,6 @@ int amountOfGames = 0; //have a variable keeping track of the amount of connecti
               bzero(buffer, 256); 
             }
           //be prepared to send out errors in case of it being wrong
-          // else if( (isalpha(buffer[0]) || strlen(buffer) <= 2) ){
           if((buffer[0] == '2' || (isalpha(buffer[1]) == 0) ) && buffer[1] != ' '){
               bzero(buffer, 256); //clear buffer before writing 
               strcpy(buffer,"0"); //add in 0 as the flag to buffer;
@@ -151,8 +149,8 @@ int amountOfGames = 0; //have a variable keeping track of the amount of connecti
               n = write(newsockfd, buffer, strlen(buffer)); //prints out the spaces
               bzero(buffer, 256); //clear out buffer after writing
           } else {
-                //check if the given letter is correct or not
-              if(buffer[1] != ' ') checkLetter(buffer[1], guessThis, spaces);
+              //Here we check if the given letter is correct or not:
+              if(buffer[1] != ' ') checkLetter(buffer[1], guessThis, spaces, incorrectlettersArray, &amountOfGuesses);
               //check if everything is correct and if so print out appropriate message
               int allCorrect = 1;
               for(int i = 0; i < (strlen(spaces)); i++){
@@ -182,7 +180,7 @@ int amountOfGames = 0; //have a variable keeping track of the amount of connecti
                 strcat(buffer, spaces); //add in the spaces
                 strcat(buffer, "\n"); //add in a space
                 strcat(buffer, "Incorrect Guesses: "); //add in second line 
-              // strcat(buffer, incorrectlettersArray); //add in incorrect guesses
+                strcat(buffer, incorrectlettersArray); //add in incorrect guesses
                 strcat(buffer, "\n");
                 n = write(newsockfd, buffer, strlen(buffer)); //prints out the spaces
                 bzero(buffer, 256);
