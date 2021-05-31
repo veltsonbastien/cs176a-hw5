@@ -26,9 +26,10 @@ void delay(int number_of_seconds) {
 }
 
 char* generateSpaces (int amountOfSpaces){
-    char* spaces = malloc(amountOfSpaces+1);
-    for(int i = 0; i < amountOfSpaces; i++){
-        spaces[i] = '_';
+    char* spaces = malloc((amountOfSpaces*2)+1); //enough room for each '_' each ' ' and the null terminator
+    spaces[0] = '_';
+    for(int i = 1; i < amountOfSpaces; i++){
+        strcat(spaces, " _");
     }
     return spaces;
 }
@@ -36,8 +37,8 @@ char* generateSpaces (int amountOfSpaces){
 void checkLetter (char givenLetter, char* guessThis, char* spaces, char* incorrectlettersArray, int* amountOfGuesses){
     if(*amountOfGuesses >= 6) return;
     int changed = 0;
-    for(int i = 0; i < (strlen(spaces)); i++){
-        if(givenLetter == guessThis[i]){ //this is the right letter at the right space
+    for(int i = 0; i < (strlen(spaces)); i+=2){
+        if(givenLetter == guessThis[i/2]){ //this is the right letter at the right space
             spaces[i]=givenLetter; //set that place to given letter
             changed = 1; //set flag to true;
         }

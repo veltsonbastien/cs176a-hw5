@@ -87,6 +87,7 @@ int main(int argc, char * argv[]) {
             int moveAmount = 0; 
             for(int i = 0; i < 6; i++){ //6 because [1 msg flag] [3 word length] [2 incorrect length]
               //find how much to move buffer
+              if( (isalpha(buffer[i]) != 0) || ( buffer[i] == '_') ) break; //get out as soon as we find something matching
               if( (isalpha(buffer[i]) == 0) && ( buffer[i] != '_') ) moveAmount++;
             }
             //move over buffer
