@@ -121,15 +121,8 @@ int amountOfGuesses = 0; //have a variable keeping track of guesses per client
         // int r = rand() % 10; //should be a number between 1 and 10 (taken from https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c)
           char* guessThis = wordsToGuess[0];
           char* spaces = generateSpaces(strlen(guessThis)); //accounting for strlen() miscount
-         // strcpy(buffer,"0"); //add in 0 as the flag to buffer;
-          // strcat(buffer, spaces); //add in the spaces
-          // strcat(buffer, "\n"); //add in a space
-          // strcat(buffer, "Incorrect Guesses: \n"); //add in second line 
-          //n = write(newsockfd, buffer, strlen(buffer)); //prints out the spaces
-          //bzero(buffer, 256);
-
           //Have an incorrectLettersArray to keep track of wrong guesses: 
-          char* incorrectlettersArray = malloc(7); //because 6 max wrong guesses
+         // char* incorrectlettersArray = malloc(7); //because 6 max wrong guesses
           //While there is still something to read on the buffer:
           while (strlen(buffer) > 0) { 
             //check how many (incorrect) guesses they are on 
@@ -148,7 +141,7 @@ int amountOfGuesses = 0; //have a variable keeping track of guesses per client
             }
           //be prepared to send out errors in case of it being wrong
           // else if( (isalpha(buffer[0]) || strlen(buffer) <= 2) ){
-            else if( 1 == 2){
+          if((buffer[0] == '2' || (isalpha(buffer[1]) == 0) ) && buffer[1] != ' '){
               bzero(buffer, 256); //clear buffer before writing 
               strcpy(buffer,"0"); //add in 0 as the flag to buffer;
               strcat(buffer, "Error! Please guess one letter."); //add in the error message

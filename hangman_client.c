@@ -66,7 +66,10 @@ int main(int argc, char * argv[]) {
    bzero(buffer, 256);
     //AT THIS POINT, EVERYTHING FOR CONNECTION HAS BEEN ESTABLISHED, send over the 0 message to the server  
     // fgets(buffer, 255, stdin);
-    n = write(sockfd, "0", 1);
+    buffer[0] = '0';
+    buffer[1] = ' '; 
+    buffer[2] = '\0';
+    n = write(sockfd, buffer, strlen(buffer));
     if (n < 0) error("ERROR writing to socket");
     bzero(buffer, 256);
     n = read(sockfd, buffer, 255);
@@ -84,11 +87,14 @@ int main(int argc, char * argv[]) {
             printf("%s\n", buffer); //print out the buffer 
             bzero(buffer, 256); // zero out the buffer 
             printf("Letter to guess: "); 
-            scanf("%s", buffer); //get the guess from user input 
+            char guess[255]; 
+            scanf("%s", guess); //get the guess from user input 
+            if(strlen(guess) == 0) buffer[0] = '0'; 
+            if(strlen(guess) == 1) buffer[0] = '1'; 
+            if(strlen(guess) >  1) buffer[0] = '2'; //since it doesn't matter really how long it is, server will handle that it was too large
+            strcat(buffer, guess);
+            //printf("Buffer is %s and its' length is %ld", buffer, strlen(buffer));
             n = write(sockfd, buffer, strlen(buffer)); //send it back to server
-        } 
-        else if(buffer[0] == '9'){ //then we know we got a game over 
-
         }    
         //keep on reading from buffer;
         n = read(sockfd, buffer, 255);
