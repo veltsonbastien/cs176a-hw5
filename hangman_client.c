@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <time.h>
+#include <ctype.h>
 
 void error(const char * msg) {
   perror(msg);
@@ -82,7 +83,14 @@ int main(int argc, char * argv[]) {
         //If runtime continues, now check the flag:
         if(buffer[0] == '0'){
             //in this case, we know we are still running game logic 
-            memmove(buffer, buffer+1, strlen(buffer)); //inspired from: https://stackoverflow.com/questions/4295754/how-to-remove-first-character-from-c-string
+            //now we remove the flags from the buffer
+            int moveAmount = 0; 
+            for(int i = 0; i < 6; i++){ //6 because [1 msg flag] [3 word length] [2 incorrect length]
+              //find how much to move buffer
+              if( (isalpha(buffer[i]) == 0) && ( buffer[i] != '_') ) moveAmount++;
+            }
+            //move over buffer
+            memmove(buffer, buffer+moveAmount, strlen(buffer)); //inspired from: https://stackoverflow.com/questions/4295754/how-to-remove-first-character-from-c-string
             printf("%s\n", buffer); //print out the buffer 
             bzero(buffer, 256); // zero out the buffer 
             printf("Letter to guess: "); 
@@ -111,6 +119,21 @@ int main(int argc, char * argv[]) {
             close(sockfd); //end the connection
             return 0; //end the program
         } 
+        if(buffer[0] == '3'){ //then we know it is an error mesasge
+            //in this case, we know we are still running game logic 
+            memmove(buffer, buffer+2, strlen(buffer)); //inspired from: https://stackoverflow.com/questions/4295754/how-to-remove-first-character-from-c-string
+            printf("%s\n", buffer); //print out the buffer 
+            bzero(buffer, 256); // zero out the buffer 
+            printf("Letter to guess: "); 
+            char guess[255]; 
+            scanf("%s", guess); //get the guess from user input 
+            if(strlen(guess) == 0) buffer[0] = '0'; 
+            if(strlen(guess) == 1) buffer[0] = '1'; 
+            if(strlen(guess) >  1) buffer[0] = '2'; //since it doesn't matter really how long it is, server will handle that it was too large
+            strcat(buffer, guess);
+            //printf("Buffer is %s and its' length is %ld", buffer, strlen(buffer));
+            n = write(sockfd, buffer, strlen(buffer)); //send it back to server
+        }
         //keep on reading from buffer;
         n = read(sockfd, buffer, 255);
         if (n < 0) error("ERROR reading from socket");

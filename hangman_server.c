@@ -144,7 +144,7 @@ int amountOfGuesses = 1; //have a variable keeping track of guesses per client
           //be prepared to send out errors in case of it being wrong
           if((buffer[0] == '2' || (isalpha(buffer[1]) == 0) ) && buffer[1] != ' '){
               bzero(buffer, 256); //clear buffer before writing 
-              strcpy(buffer,"0"); //add in 0 as the flag to buffer;
+              strcpy(buffer,"30"); //add in 30 as the flag to buffer for message length;
               strcat(buffer, "Error! Please guess one letter."); //add in the error message
               strcat(buffer, "\n"); //add in a space
               n = write(newsockfd, buffer, strlen(buffer)); //prints out the spaces
@@ -178,6 +178,12 @@ int amountOfGuesses = 1; //have a variable keeping track of guesses per client
                 //else keep on printing out the other stuff 
                 bzero(buffer, 256); //clear buffer before writing 
                 strcpy(buffer,"0"); //add in 0 as the flag to buffer;
+                char wordLength[3];
+                sprintf(wordLength, "%ld", strlen(spaces)); //convert word length to integer
+                strcat(buffer, wordLength); //add in the word length 
+                char incorrectLength[2];
+                sprintf(incorrectLength, "%ld", strlen(incorrectlettersArray)); //convert incorrect length to integer
+                strcat(buffer, incorrectLength); //add in the word length 
                 strcat(buffer, spaces); //add in the spaces
                 strcat(buffer, "\n"); //add in a space
                 strcat(buffer, "Incorrect Guesses: "); //add in second line 
