@@ -65,7 +65,6 @@ int main(int argc, char * argv[]) {
 
    bzero(buffer, 256);
     //AT THIS POINT, EVERYTHING FOR CONNECTION HAS BEEN ESTABLISHED, send over the 0 message to the server  
-    // fgets(buffer, 255, stdin);
     buffer[0] = '0';
     buffer[1] = ' '; 
     buffer[2] = '\0';

@@ -119,8 +119,8 @@ int amountOfGuesses = 1; //have a variable keeping track of guesses per client
           //NOW BEGIN THE GAME LOGIC:
           //First, choose a word: 
           //Also, make sure there's a random seed for the random int generator: 
-          srand(time(NULL));
-          int r = rand() % 2; //should be a number between 1 and 10 (taken from https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c)
+          srand(time(NULL)); // generate a new seed for the random when a connection start
+          int r = rand() % 10; //should be a number between 1 and 10 (taken from https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c)
           char* guessThis = wordsToGuess[r];
           char* spaces = generateSpaces(strlen(guessThis)); //accounting for strlen() miscount
           //Have an incorrectLettersArray to keep track of wrong guesses: 
