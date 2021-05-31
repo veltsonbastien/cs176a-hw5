@@ -95,6 +95,13 @@ int main(int argc, char * argv[]) {
             strcat(buffer, guess);
             //printf("Buffer is %s and its' length is %ld", buffer, strlen(buffer));
             n = write(sockfd, buffer, strlen(buffer)); //send it back to server
+        }
+        if(buffer[0] == '8'){ 
+            //in this case we know that we have won
+            memmove(buffer, buffer+1, strlen(buffer)); //inspired from: https://stackoverflow.com/questions/4295754/how-to-remove-first-character-from-c-string
+            printf("%s\n", buffer); //print out the buffer 
+            close(sockfd); //end the connection
+            return 0; //end the program
         }    
         //keep on reading from buffer;
         n = read(sockfd, buffer, 255);
