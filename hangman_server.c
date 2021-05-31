@@ -64,7 +64,8 @@ if (fp == NULL)
 char wordsToGuess[10][14]; //allocated for the words in the file 
 unsigned int indexer = 0; 
 while ((readin = getline(&line, &len, fp)) != -1) {
-    strcpy(wordsToGuess[indexer], line+'\0');
+    line[strlen(line)-2] = '\0'; //clean up line
+    strcpy(wordsToGuess[indexer], line);
     indexer++; //increase indexer to move to next spot
 } 
 
@@ -119,8 +120,8 @@ int amountOfGuesses = 1; //have a variable keeping track of guesses per client
           //First, choose a word: 
           //Also, make sure there's a random seed for the random int generator: 
           srand(time(NULL));
-        // int r = rand() % 10; //should be a number between 1 and 10 (taken from https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c)
-          char* guessThis = wordsToGuess[0];
+          int r = rand() % 2; //should be a number between 1 and 10 (taken from https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c)
+          char* guessThis = wordsToGuess[r];
           char* spaces = generateSpaces(strlen(guessThis)); //accounting for strlen() miscount
           //Have an incorrectLettersArray to keep track of wrong guesses: 
           char* incorrectlettersArray = malloc(7); //because 6 max wrong guesses

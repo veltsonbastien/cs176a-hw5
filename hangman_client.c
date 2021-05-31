@@ -100,6 +100,7 @@ int main(int argc, char * argv[]) {
             //in this case we know that we have won
             memmove(buffer, buffer+1, strlen(buffer)); //inspired from: https://stackoverflow.com/questions/4295754/how-to-remove-first-character-from-c-string
             printf("%s\n", buffer); //print out the buffer 
+            bzero(buffer, 256); //clear out the buffer
             close(sockfd); //end the connection
             return 0; //end the program
         }    
@@ -107,6 +108,7 @@ int main(int argc, char * argv[]) {
             //in this case we know that we have lost
             memmove(buffer, buffer+1, strlen(buffer)); //inspired from: https://stackoverflow.com/questions/4295754/how-to-remove-first-character-from-c-string
             printf("%s\n", buffer); //print out the buffer 
+            bzero(buffer, 256); //clear out the buffer
             close(sockfd); //end the connection
             return 0; //end the program
         } 
