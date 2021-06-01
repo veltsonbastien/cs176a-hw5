@@ -75,7 +75,7 @@ int main(int argc, char * argv[]) {
     n = read(sockfd, buffer, 255);
     if (n < 0) error("ERROR reading from socket");
     //While there is still something to read on the buffer:
-    while (strlen(buffer) > 0) { 
+    while (strlen(buffer) > 0 ) { 
         if(strcmp(buffer, "server-overloaded") == 0){ //If the message is an overload error, end the connection
          close(sockfd);
          return 0;
@@ -98,6 +98,12 @@ int main(int argc, char * argv[]) {
             printf(">>>Letter to guess: "); 
             char guess[255]; 
             scanf("%s", guess); //get the guess from user input 
+            //handle for CONTROL-D or null 
+            if(strlen(guess) == 0){
+                n = write(sockfd, "\n", 0); //send an x to the server signaling a terminate
+                close(sockfd); //terminate connection;
+                return 0; //return
+            }
             if(strlen(guess) == 0) buffer[0] = '0'; 
             if(strlen(guess) == 1) buffer[0] = '1'; 
             if(strlen(guess) >  1) buffer[0] = '2'; //since it doesn't matter really how long it is, server will handle that it was too large
@@ -129,6 +135,12 @@ int main(int argc, char * argv[]) {
             printf(">>>Letter to guess: "); 
             char guess[255]; 
             scanf("%s", guess); //get the guess from user input 
+            //handle for CONTROL-D or null 
+            if(strlen(guess) == 0){
+                n = write(sockfd, "\n", 0); //send an x to the server signaling a terminate
+                close(sockfd); //terminate connection;
+                return 0; //return;
+            }
             if(strlen(guess) == 0) buffer[0] = '0'; 
             if(strlen(guess) == 1) buffer[0] = '1'; 
             if(strlen(guess) >  1) buffer[0] = '2'; //since it doesn't matter really how long it is, server will handle that it was too large
@@ -138,7 +150,7 @@ int main(int argc, char * argv[]) {
         }
         //keep on reading from buffer;
         n = read(sockfd, buffer, 255);
-        if (n < 0) error("ERROR reading from socket");
+        //if (n < 0) error("ERROR reading from socket");
     }
     //Close the socket:
     close(sockfd);

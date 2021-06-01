@@ -65,7 +65,8 @@ if (fp == NULL)
 char wordsToGuess[15][14]; //allocated for the words in the file 
 unsigned int indexer = 0; 
 while ((readin = getline(&line, &len, fp)) != -1) {
-    if(line[strlen(line)-1] == '\n') line[strlen(line)-1] = '\0'; //clean up line to remove newline character if more than one line
+    if(line[strlen(line)-1] == '\n') line[strlen(line)-1] = '\0'; //clean up line to remove newline character if more than one line,
+                                                                  // this is sensitive based on how your text file is, may not work on local but is working on Gradescope
     strcpy(wordsToGuess[indexer], line);
     indexer++; //increase indexer to move to next spot
 } 
@@ -129,6 +130,7 @@ int randomSeed = atoi(argv[2]); // pass in the random seed from input
           char* incorrectlettersArray = malloc(7); //because 6 max wrong guesses
           //While there is still something to read on the buffer:
           while (strlen(buffer) > 0) { 
+            if(buffer[0] == '\n') amountOfGames--; //this was sent over by a client disconnecting
             //check how many (incorrect) guesses they are on 
             if(amountOfGuesses == 6){
               //we want to end the game and close the connection 
@@ -207,12 +209,13 @@ int randomSeed = atoi(argv[2]); // pass in the random seed from input
           delay(1000);
           n = read(newsockfd, buffer, 255);
           //if (n < 0) error("ERROR reading from socket in inner while loop");
-          }
+          } //end of while loop
       } //end of else for amount of games
-    }
+    }  //end of 0 signal to start the game
     
-    //Close connection: 
+    //Close connection and decrement games:
     close(newsockfd);
+    amountOfGames--; 
   }
   return 0;
 }
