@@ -94,6 +94,7 @@ int main(int argc, char * argv[]) {
             memmove(buffer, buffer+moveAmount, strlen(buffer)); //inspired from: https://stackoverflow.com/questions/4295754/how-to-remove-first-character-from-c-string
             printf("%s\n", buffer); //print out the buffer 
             bzero(buffer, 256); // zero out the buffer 
+            printf(">>>\n");
             printf(">>>Letter to guess: "); 
             char guess[255]; 
             scanf("%s", guess); //get the guess from user input 
@@ -125,7 +126,7 @@ int main(int argc, char * argv[]) {
             memmove(buffer, buffer+2, strlen(buffer)); //inspired from: https://stackoverflow.com/questions/4295754/how-to-remove-first-character-from-c-string
             printf("%s\n", buffer); //print out the buffer 
             bzero(buffer, 256); // zero out the buffer 
-            printf("Letter to guess: "); 
+            printf(">>>Letter to guess: "); 
             char guess[255]; 
             scanf("%s", guess); //get the guess from user input 
             if(strlen(guess) == 0) buffer[0] = '0'; 

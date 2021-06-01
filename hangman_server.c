@@ -199,7 +199,6 @@ int randomSeed = atoi(argv[2]); // pass in the random seed from input
                 strcat(buffer,">>>"); 
                 strcat(buffer, "Incorrect Guesses: "); //add in second line 
                 strcat(buffer, incorrectlettersArray); //add in incorrect guesses
-                strcat(buffer, "\n");
                 n = write(newsockfd, buffer, strlen(buffer)); //prints out the spaces
                 bzero(buffer, 256);
               }//end of else  
