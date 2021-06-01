@@ -115,7 +115,11 @@ int randomSeed = atoi(argv[2]); // pass in the random seed from input
     if(buffer[0] == '0'){ //only start the game once you got that 
       //This keeps track of the amount of games: 
       if(amountOfGames >= 3){ //if more than 3 games, print error and close conection 
-          n = write(newsockfd, "server-overloaded", 17);
+          bzero(buffer, 256); 
+          strcpy(buffer,"1"); //add in 1 as the flag to buffer; to signify server overload 
+          strcat(buffer,">>>server-overloaded"); 
+          n = write(newsockfd, buffer, strlen(buffer));
+          bzero(buffer, 256);
       } else {
           amountOfGames++; //else, increment the amount of games      
           //NOW BEGIN THE GAME LOGIC:
