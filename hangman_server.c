@@ -54,29 +54,21 @@ void checkLetter (char givenLetter, char* guessThis, char* spaces, char* incorre
    }
 }
 
+#define LSIZ 128 
+#define RSIZ 16 
+
 int main(int argc, char * argv[]) {
 //SETTING UP THE GAME: 
-//First, read in the file (code taken from https://stackoverflow.com/questions/3501338/c-read-file-line-by-line): 
-FILE * fp;
-char * line = NULL;
-size_t len = 0;
-ssize_t readin;
+//First, read in the file (code taken from https://www.w3resource.com/c-programming-exercises/file-handling/c-file-handling-exercise-4.php): 
+char line[RSIZ][LSIZ];
+    FILE *fptr = NULL; 
+    int i = 0;
 
-fp = fopen("hangman_words.txt", "r");
-if (fp == NULL)
-    exit(EXIT_FAILURE);
-
-char **wordsToGuess; //dynamic string array with code from: https://stackoverflow.com/questions/5935933/dynamically-create-an-array-of-strings-with-malloc
-wordsToGuess = malloc(15 * sizeof(char*));
-int indexer = 0; 
-while ((readin = getline(&line, &len, fp)) != -1) {
-    if(line[strlen(line)-1] == '\n') line[strlen(line)-1] = '\0'; //clean up line to remove newline character if more than one line,
-                                                                  // this is sensitive based on how your text file is, may not work on local but is working on Gradescope
-    wordsToGuess[indexer] = malloc(16*sizeof(char));
-    strcpy(wordsToGuess[indexer], line);
-    indexer = indexer+1; //increase indexer to move to next spot
-} 
-
+    fptr = fopen("hangman_words.txt", "r");
+    while(fgets(line[i], LSIZ, fptr)) {
+        line[i][strlen(line[i]) - 1] = '\0';
+        i++;
+    }
 
 //At this point, all words are loaded into wordsToGuess, and this can be randomly indexed later. 
 
@@ -122,7 +114,7 @@ int randomSeed = atoi(argv[2]); // pass in the random seed from input
     //buffer[strlen(buffer) - 1] = '\0'; //Clean up buffer
     if(buffer[0] == '0'){ //only start the game once you got that 
       //This keeps track of the amount of games: 
-      if(amountOfGames == 3){ //if more than 3 games, print error and close conection 
+      if(amountOfGames >= 3){ //if more than 3 games, print error and close conection 
           n = write(newsockfd, "server-overloaded", 17);
       } else {
           amountOfGames++; //else, increment the amount of games      
@@ -130,9 +122,8 @@ int randomSeed = atoi(argv[2]); // pass in the random seed from input
           //First, choose a word: 
           //Also, make sure there's a random seed for the random int generator: 
           srand(randomSeed); // generate a new seed for the random when a connection start
-          int r = rand() % indexer; //should be a number between 1 and indexer amount (taken from https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c)
-          char* guessThis = wordsToGuess[r];
-          printf("Word is: %s", guessThis);
+          int r = rand() % (i); //should be a number between 1 and indexer amount (taken from https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c)
+          char* guessThis = line[r];
           char* spaces = generateSpaces(strlen(guessThis)); //accounting for strlen() miscount
           //Have an incorrectLettersArray to keep track of wrong guesses: 
           char* incorrectlettersArray = malloc(16); //because 6 max wrong guesses
@@ -197,10 +188,10 @@ int randomSeed = atoi(argv[2]); // pass in the random seed from input
                 bzero(buffer, 256); //clear buffer before writing 
                 strcpy(buffer,"0"); //add in 0 as the flag to buffer;
                 char wordLength[3];
-                sprintf(wordLength, "%ld", strlen(spaces)); //convert word length to integer
+                sprintf(wordLength, "%lu", strlen(spaces)); //convert word length to integer
                 strcat(buffer, wordLength); //add in the word length 
                 char incorrectLength[2];
-                sprintf(incorrectLength, "%ld", strlen(incorrectlettersArray)); //convert incorrect length to integer
+                sprintf(incorrectLength, "%lu", strlen(incorrectlettersArray)); //convert incorrect length to integer
                 strcat(buffer, incorrectLength); //add in the word length 
                 strcat(buffer,">>>"); 
                 strcat(buffer, spaces); //add in the spaces
