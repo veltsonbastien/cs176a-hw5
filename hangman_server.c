@@ -65,7 +65,7 @@ if (fp == NULL)
 char wordsToGuess[15][14]; //allocated for the words in the file 
 unsigned int indexer = 0; 
 while ((readin = getline(&line, &len, fp)) != -1) {
-    if(line[strlen(line)-1] == '\n') line[strlen(line)-2] = '\0'; //clean up line to remove newline character if more than one line
+    if(line[strlen(line)-1] == '\n') line[strlen(line)-1] = '\0'; //clean up line to remove newline character if more than one line
     strcpy(wordsToGuess[indexer], line);
     indexer++; //increase indexer to move to next spot
 } 
