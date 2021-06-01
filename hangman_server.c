@@ -45,7 +45,11 @@ void checkLetter (char givenLetter, char* guessThis, char* spaces, char* incorre
     }
    //if not changed, that means this letter was wrong so we add it to the wrong letters list
    if(changed == 0){
-     strncat(incorrectlettersArray, &givenLetter, 1);
+     if(strlen(incorrectlettersArray) == 0) strncat(incorrectlettersArray, &givenLetter, 1);
+     else{
+      strcat(incorrectlettersArray, " ");
+      strncat(incorrectlettersArray, &givenLetter, 1);
+     }
      *amountOfGuesses = *amountOfGuesses+1; //update the amount of guesses
    }
 }
@@ -127,7 +131,7 @@ int randomSeed = atoi(argv[2]); // pass in the random seed from input
           char* guessThis = wordsToGuess[r];
           char* spaces = generateSpaces(strlen(guessThis)); //accounting for strlen() miscount
           //Have an incorrectLettersArray to keep track of wrong guesses: 
-          char* incorrectlettersArray = malloc(7); //because 6 max wrong guesses
+          char* incorrectlettersArray = malloc(16); //because 6 max wrong guesses
           //While there is still something to read on the buffer:
           while (strlen(buffer) > 0) { 
             if(buffer[0] == '\n') amountOfGames--; //this was sent over by a client disconnecting
