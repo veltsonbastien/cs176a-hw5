@@ -99,7 +99,7 @@ int main(int argc, char * argv[]) {
             char guess[255]; 
             scanf("%s", guess); //get the guess from user input 
             //handle for CONTROL-D or null 
-            if(strlen(guess) == 0 || guess == EOF){
+            if(strlen(guess) == 0 || feof(stdin)){
                 n = write(sockfd, "\n", 0); //send an x to the server signaling a terminate
                 close(sockfd); //terminate connection;
                 printf("\n"); //print a new line
@@ -137,11 +137,11 @@ int main(int argc, char * argv[]) {
             char guess[255]; 
             scanf("%s", guess); //get the guess from user input 
             //handle for CONTROL-D or null 
-            if(strlen(guess) == 0 || guess == EOF){
+            if(strlen(guess) == 0 || feof(stdin)){
                 n = write(sockfd, "\n", 0); //send an x to the server signaling a terminate
                 close(sockfd); //terminate connection;
                 printf("\n"); //print a new line
-                return 0; //return;
+                return 0; //return
             }
             if(strlen(guess) == 0) buffer[0] = '0'; 
             if(strlen(guess) == 1) buffer[0] = '1'; 

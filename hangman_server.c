@@ -154,7 +154,6 @@ int randomSeed = atoi(argv[2]); // pass in the random seed from input
               strcpy(buffer,"30"); //add in 30 as the flag to buffer for message length;
               strcat(buffer,">>>"); 
               strcat(buffer, "Error! Please guess one letter."); //add in the error message
-              strcat(buffer, "\n"); //add in a space
               n = write(newsockfd, buffer, strlen(buffer)); //prints out the spaces
               bzero(buffer, 256); //clear out buffer after writing
           } else {
