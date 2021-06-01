@@ -59,6 +59,8 @@ void checkLetter (char givenLetter, char* guessThis, char* spaces, char* incorre
 
 int main(int argc, char * argv[]) {
 //SETTING UP THE GAME: 
+srand(0); 
+
 //First, read in the file (code taken from https://www.w3resource.com/c-programming-exercises/file-handling/c-file-handling-exercise-4.php): 
 char line[RSIZ][LSIZ];
     FILE *fptr = NULL; 
@@ -74,7 +76,8 @@ char line[RSIZ][LSIZ];
 
 int amountOfGames = 0; //have a variable keeping track of the amount of connections 
 int amountOfGuesses = 1; //have a variable keeping track of guesses per client
-int randomSeed = atoi(argv[2]); // pass in the random seed from input
+//srand(atoi(argv[2])); // generate a new seed for the random when a connection start
+
 
 //Now, we begin listening for the client and setting all that up
   int sockfd, newsockfd, portno;
@@ -125,8 +128,9 @@ int randomSeed = atoi(argv[2]); // pass in the random seed from input
           //NOW BEGIN THE GAME LOGIC:
           //First, choose a word: 
           //Also, make sure there's a random seed for the random int generator: 
-          srand(randomSeed); // generate a new seed for the random when a connection start
-          int r = rand() % (i); //should be a number between 1 and indexer amount (taken from https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c)
+          int r = rand() % (i); //should be a number between 0 and i amount (taken from https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c)
+          printf("random: %d", r);
+          fflush(stdout);
           char* guessThis = line[r];
           char* spaces = generateSpaces(strlen(guessThis)); //accounting for strlen() miscount
           //Have an incorrectLettersArray to keep track of wrong guesses: 
@@ -144,7 +148,7 @@ int randomSeed = atoi(argv[2]); // pass in the random seed from input
               strcat(buffer, guessThis); 
               strcat(buffer,"\n"); //add in a space
               strcat(buffer,">>>"); 
-              strcat(buffer,"You Lose."); //add in the game over message;
+              strcat(buffer,"You Lose!"); //add in the game over message;
               strcat(buffer,"\n"); //add in a line break
               strcat(buffer,">>>"); 
               strcat(buffer,"Game Over!"); //add in the game over message;
@@ -216,7 +220,7 @@ int randomSeed = atoi(argv[2]); // pass in the random seed from input
     }  //end of 0 signal to start the game
     
     //Close connection and decrement games:
-    close(newsockfd);
+    //close(newsockfd);
     amountOfGames--; 
   }
   return 0;
