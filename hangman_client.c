@@ -32,7 +32,7 @@ int main(int argc, char * argv[]) {
 
   //First thing, Client asks if user wants to join game: 
   int yon;
-  printf("Ready to start game? (y/n): ");
+  printf(">>>Ready to start game? (y/n): ");
   yon = getchar( );
   
   //only start the connection and all that if they say yes: 
