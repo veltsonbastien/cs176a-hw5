@@ -74,6 +74,7 @@ while ((readin = getline(&line, &len, fp)) != -1) {
 
 int amountOfGames = 0; //have a variable keeping track of the amount of connections 
 int amountOfGuesses = 1; //have a variable keeping track of guesses per client
+int randomSeed = atoi(argv[2]); // pass in the random seed from input
 
 //Now, we begin listening for the client and setting all that up
   int sockfd, newsockfd, portno;
@@ -120,7 +121,7 @@ int amountOfGuesses = 1; //have a variable keeping track of guesses per client
           //NOW BEGIN THE GAME LOGIC:
           //First, choose a word: 
           //Also, make sure there's a random seed for the random int generator: 
-          srand(time(NULL)); // generate a new seed for the random when a connection start
+          srand(randomSeed); // generate a new seed for the random when a connection start
           int r = rand() % indexer; //should be a number between 1 and indexer amount (taken from https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c)
           char* guessThis = wordsToGuess[r];
           char* spaces = generateSpaces(strlen(guessThis)); //accounting for strlen() miscount
@@ -133,11 +134,14 @@ int amountOfGuesses = 1; //have a variable keeping track of guesses per client
               //we want to end the game and close the connection 
               bzero(buffer, 256); //clear buffer before writing
               strcpy(buffer,"9"); //add in 9 as the flag to buffer; to signify game over 
+              strcat(buffer,">>>"); 
               strcat(buffer,"The word was ");
               strcat(buffer, guessThis); 
               strcat(buffer,"\n"); //add in a space
+              strcat(buffer,">>>"); 
               strcat(buffer,"You Lose."); //add in the game over message;
               strcat(buffer,"\n"); //add in a line break
+              strcat(buffer,">>>"); 
               strcat(buffer,"Game Over!"); //add in the game over message;
               n = write(newsockfd, buffer, strlen(buffer)); //write out game over 
               bzero(buffer, 256); 
@@ -146,6 +150,7 @@ int amountOfGuesses = 1; //have a variable keeping track of guesses per client
           if((buffer[0] == '2' || (isalpha(buffer[1]) == 0) ) && buffer[1] != ' '){
               bzero(buffer, 256); //clear buffer before writing 
               strcpy(buffer,"30"); //add in 30 as the flag to buffer for message length;
+              strcat(buffer,">>>"); 
               strcat(buffer, "Error! Please guess one letter."); //add in the error message
               strcat(buffer, "\n"); //add in a space
               n = write(newsockfd, buffer, strlen(buffer)); //prints out the spaces
@@ -163,11 +168,14 @@ int amountOfGuesses = 1; //have a variable keeping track of guesses per client
               if(allCorrect == 1){
                 bzero(buffer, 256); //clear buffer before writing
                 strcpy(buffer,"8"); //add in 9 as the flag to buffer; to signify game over 
+                strcat(buffer,">>>"); 
                 strcat(buffer,"The word was ");
                 strcat(buffer, guessThis); 
                 strcat(buffer,"\n"); //add in a space
+                strcat(buffer,">>>"); 
                 strcat(buffer,"You Win!"); //add in the game over message;
                 strcat(buffer,"\n"); //add in a line break
+                strcat(buffer,">>>"); 
                 strcat(buffer,"Game Over!"); //add in the game over message;
                 n = write(newsockfd, buffer, strlen(buffer)); //write out game over 
                 bzero(buffer, 256);    
@@ -185,8 +193,10 @@ int amountOfGuesses = 1; //have a variable keeping track of guesses per client
                 char incorrectLength[2];
                 sprintf(incorrectLength, "%ld", strlen(incorrectlettersArray)); //convert incorrect length to integer
                 strcat(buffer, incorrectLength); //add in the word length 
+                strcat(buffer,">>>"); 
                 strcat(buffer, spaces); //add in the spaces
                 strcat(buffer, "\n"); //add in a space
+                strcat(buffer,">>>"); 
                 strcat(buffer, "Incorrect Guesses: "); //add in second line 
                 strcat(buffer, incorrectlettersArray); //add in incorrect guesses
                 strcat(buffer, "\n");

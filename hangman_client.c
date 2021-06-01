@@ -87,14 +87,14 @@ int main(int argc, char * argv[]) {
             int moveAmount = 0; 
             for(int i = 0; i < 6; i++){ //6 because [1 msg flag] [3 word length] [2 incorrect length]
               //find how much to move buffer
-              if( (isalpha(buffer[i]) != 0) || ( buffer[i] == '_') ) break; //get out as soon as we find something matching
-              if( (isalpha(buffer[i]) == 0) && ( buffer[i] != '_') ) moveAmount++;
+              if( (isalpha(buffer[i]) != 0) || ( buffer[i] == '_') || (buffer[i] == '>') ) break; //get out as soon as we find something matching
+              if( (isalpha(buffer[i]) == 0) && ( buffer[i] != '_') && (buffer[i] != '>') ) moveAmount++;
             }
             //move over buffer
             memmove(buffer, buffer+moveAmount, strlen(buffer)); //inspired from: https://stackoverflow.com/questions/4295754/how-to-remove-first-character-from-c-string
             printf("%s\n", buffer); //print out the buffer 
             bzero(buffer, 256); // zero out the buffer 
-            printf("Letter to guess: "); 
+            printf(">>>Letter to guess: "); 
             char guess[255]; 
             scanf("%s", guess); //get the guess from user input 
             if(strlen(guess) == 0) buffer[0] = '0'; 
