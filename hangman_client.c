@@ -156,7 +156,7 @@ int main(int argc, char * argv[]) {
         //if (n < 0) error("ERROR reading from socket");
     }
     //Close the socket:
-    close(sockfd);
+    //close(sockfd);
   } //end of if yon is y
   return 0;
 }
