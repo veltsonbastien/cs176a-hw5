@@ -66,14 +66,17 @@ fp = fopen("hangman_words.txt", "r");
 if (fp == NULL)
     exit(EXIT_FAILURE);
 
-char wordsToGuess[15][14]; //allocated for the words in the file 
-unsigned int indexer = 0; 
+char **wordsToGuess; //dynamic string array with code from: https://stackoverflow.com/questions/5935933/dynamically-create-an-array-of-strings-with-malloc
+wordsToGuess = malloc(15 * sizeof(char*));
+int indexer = 0; 
 while ((readin = getline(&line, &len, fp)) != -1) {
     if(line[strlen(line)-1] == '\n') line[strlen(line)-1] = '\0'; //clean up line to remove newline character if more than one line,
                                                                   // this is sensitive based on how your text file is, may not work on local but is working on Gradescope
+    wordsToGuess[indexer] = malloc(16*sizeof(char));
     strcpy(wordsToGuess[indexer], line);
-    indexer++; //increase indexer to move to next spot
+    indexer = indexer+1; //increase indexer to move to next spot
 } 
+
 
 //At this point, all words are loaded into wordsToGuess, and this can be randomly indexed later. 
 
@@ -129,6 +132,7 @@ int randomSeed = atoi(argv[2]); // pass in the random seed from input
           srand(randomSeed); // generate a new seed for the random when a connection start
           int r = rand() % indexer; //should be a number between 1 and indexer amount (taken from https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c)
           char* guessThis = wordsToGuess[r];
+          printf("Word is: %s", guessThis);
           char* spaces = generateSpaces(strlen(guessThis)); //accounting for strlen() miscount
           //Have an incorrectLettersArray to keep track of wrong guesses: 
           char* incorrectlettersArray = malloc(16); //because 6 max wrong guesses
