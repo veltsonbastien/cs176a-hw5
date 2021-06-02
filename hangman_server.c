@@ -62,7 +62,7 @@ void checkLetter (char givenLetter, char* guessThis, char* spaces, char* incorre
 }
 
 //OVERALL FUNCTION FOR GAME
-void startGame(int *amountOfGames, int i, char* buffer, int n, int newsockfd){
+void startGame(int amountOfGames, int i, char* buffer, int n, int newsockfd){
           amountOfGames++; //else, increment the amount of games      
           //NOW BEGIN THE GAME LOGIC:
           //First, choose a word: 
@@ -226,7 +226,7 @@ srand(0);
         if(buffer[0] == '0'){ //only start the game once you got that 
           //This keeps track of the amount of games: 
             //function to run the game
-            startGame(&amountOfGames, i, buffer, n, newsockfd); 
+            startGame(amountOfGames, i, buffer, n, newsockfd); 
         }  //end of 0 signal to start the game
        }
     }//end of connection probe for space
