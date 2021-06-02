@@ -1,4 +1,3 @@
-// Code from TCP Example Code given on Gauchospace
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -166,7 +165,6 @@ int main(int argc, char * argv[]) {
         //keep on reading from buffer;
         bzero(buffer, 256);
         n = read(sockfd, buffer, 255);
-        //if (n < 0) error("ERROR reading from socket");
      }
     } //end of if yon is y
    } //end of big else showing that things are fine

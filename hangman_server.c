@@ -230,9 +230,6 @@ srand(0);
         }  //end of 0 signal to start the game
        }
     }//end of connection probe for space
-    
-    //Close connection and decrement games:
-    //close(newsockfd);
     amountOfGames--; 
   } //end of large infinite while loop
   return 0;
