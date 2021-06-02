@@ -9,6 +9,13 @@
 #include <time.h>
 #include <ctype.h>
 
+//Definitions for Array Size
+#define LSIZ 128 
+#define RSIZ 16 
+char line[RSIZ][LSIZ];
+
+int amountOfGames = 0; //have a variable keeping track of the amount of connections 
+
 void error(const char * msg) {
   perror(msg);
   exit(1);
@@ -54,87 +61,18 @@ void checkLetter (char givenLetter, char* guessThis, char* spaces, char* incorre
    }
 }
 
-#define LSIZ 128 
-#define RSIZ 16 
-
-int main(int argc, char * argv[]) {
-//SETTING UP THE GAME: 
-srand(0); 
-
-//First, read in the file (code taken from https://www.w3resource.com/c-programming-exercises/file-handling/c-file-handling-exercise-4.php): 
-char line[RSIZ][LSIZ];
-    FILE *fptr = NULL; 
-    int i = 0;
-
-    fptr = fopen("hangman_words.txt", "r");
-    while(fgets(line[i], LSIZ, fptr)) {
-        line[i][strlen(line[i]) - 1] = '\0';
-        i++;
-    }
-
-//At this point, all words are loaded into wordsToGuess, and this can be randomly indexed later. 
-
-int amountOfGames = 0; //have a variable keeping track of the amount of connections 
-int amountOfGuesses = 1; //have a variable keeping track of guesses per client
-//srand(atoi(argv[2])); // generate a new seed for the random when a connection start
-
-
-//Now, we begin listening for the client and setting all that up
-  int sockfd, newsockfd, portno;
-  socklen_t clilen;
-  char buffer[256];
-  struct sockaddr_in serv_addr, cli_addr;
-  int n;
-  if (argc < 2) {
-    fprintf(stderr, "ERROR, no port provided\n");
-    exit(1);
-  }
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (sockfd < 0)
-    error("ERROR opening socket");
-  bzero((char * ) & serv_addr, sizeof(serv_addr));
-  portno = atoi(argv[1]);
-  serv_addr.sin_family = AF_INET;
-  serv_addr.sin_addr.s_addr = INADDR_ANY;
-  serv_addr.sin_port = htons(portno);
-  if (bind(sockfd, (struct sockaddr * ) & serv_addr,
-      sizeof(serv_addr)) < 0)
-    error("ERROR on binding");
-  listen(sockfd, 5);
-  clilen = sizeof(cli_addr);
-  //AT THIS POINT EVERYTING FOR SETTING UP THE CONNECTION IS DONE, WE ARE NOW LISTENING FOR A CONNECTION TO START THE GAME
-
- //This will allow for the TCP connection to remain open:
-  while (1) { 
-    newsockfd = accept(sockfd,
-      (struct sockaddr * ) & cli_addr, &
-      clilen);
-    if (newsockfd < 0)
-      error("ERROR on accept");
-    bzero(buffer, 256);
-    n = read(newsockfd, buffer, 255); //read in from the new connection, expecting a "0" to start the game
-    if (n < 0) error("ERROR reading from socket");
-    //buffer[strlen(buffer) - 1] = '\0'; //Clean up buffer
-    if(buffer[0] == '0'){ //only start the game once you got that 
-      //This keeps track of the amount of games: 
-      if(amountOfGames >= 3){ //if more than 3 games, print error and close conection 
-          bzero(buffer, 256); 
-          strcpy(buffer,"1"); //add in 1 as the flag to buffer; to signify server overload 
-          strcat(buffer,">>>server-overloaded"); 
-          n = write(newsockfd, buffer, strlen(buffer));
-          bzero(buffer, 256);
-      } else {
+//OVERALL FUNCTION FOR GAME
+void startGame(int *amountOfGames, int i, char* buffer, int n, int newsockfd){
           amountOfGames++; //else, increment the amount of games      
           //NOW BEGIN THE GAME LOGIC:
           //First, choose a word: 
           //Also, make sure there's a random seed for the random int generator: 
           int r = rand() % (i); //should be a number between 0 and i amount (taken from https://stackoverflow.com/questions/822323/how-to-generate-a-random-int-in-c)
-          printf("random: %d", r);
-          fflush(stdout);
           char* guessThis = line[r];
           char* spaces = generateSpaces(strlen(guessThis)); //accounting for strlen() miscount
           //Have an incorrectLettersArray to keep track of wrong guesses: 
           char* incorrectlettersArray = malloc(16); //because 6 max wrong guesses
+          int amountOfGuesses = 1; //have a variable keeping track of guesses per client
           //While there is still something to read on the buffer:
           while (strlen(buffer) > 0) { 
             if(buffer[0] == '\n') amountOfGames--; //this was sent over by a client disconnecting
@@ -216,12 +154,79 @@ int amountOfGuesses = 1; //have a variable keeping track of guesses per client
           n = read(newsockfd, buffer, 255);
           //if (n < 0) error("ERROR reading from socket in inner while loop");
           } //end of while loop
+}
+
+
+int main(int argc, char * argv[]) {
+//SETTING UP THE GAME: 
+//Add in a random number
+srand(0); 
+
+//First, read in the file (code taken from https://www.w3resource.com/c-programming-exercises/file-handling/c-file-handling-exercise-4.php): 
+    FILE *fptr = NULL; 
+    int i = 0;
+
+    fptr = fopen("hangman_words.txt", "r");
+    while(fgets(line[i], LSIZ, fptr)) {
+        line[i][strlen(line[i]) - 1] = '\0';
+        i++;
+    }
+
+//At this point, all words are loaded into wordsToGuess, and this can be randomly indexed later. 
+
+//Now, we begin listening for the client and setting all that up
+  int sockfd, newsockfd, portno;
+  socklen_t clilen;
+  char buffer[256];
+  struct sockaddr_in serv_addr, cli_addr;
+  int n;
+  if (argc < 2) {
+    fprintf(stderr, "ERROR, no port provided\n");
+    exit(1);
+  }
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (sockfd < 0)
+    error("ERROR opening socket");
+  bzero((char * ) & serv_addr, sizeof(serv_addr));
+  portno = atoi(argv[1]);
+  serv_addr.sin_family = AF_INET;
+  serv_addr.sin_addr.s_addr = INADDR_ANY;
+  serv_addr.sin_port = htons(portno);
+  if (bind(sockfd, (struct sockaddr * ) & serv_addr,
+      sizeof(serv_addr)) < 0)
+    error("ERROR on binding");
+  listen(sockfd, 5);
+  clilen = sizeof(cli_addr);
+  //AT THIS POINT EVERYTING FOR SETTING UP THE CONNECTION IS DONE, WE ARE NOW LISTENING FOR A CONNECTION TO START THE GAME
+
+ //This will allow for the TCP connection to remain open:
+  while (1) { 
+    newsockfd = accept(sockfd,
+      (struct sockaddr * ) & cli_addr, &
+      clilen);
+    if (newsockfd < 0)
+      error("ERROR on accept");
+    bzero(buffer, 256);
+    n = read(newsockfd, buffer, 255); //read in from the new connection, expecting a "0" to start the game
+    if (n < 0) error("ERROR reading from socket");
+    //buffer[strlen(buffer) - 1] = '\0'; //Clean up buffer
+    if(buffer[0] == '0'){ //only start the game once you got that 
+      //This keeps track of the amount of games: 
+      if(amountOfGames >= 3){ //if more than 3 games, print error and close conection 
+          bzero(buffer, 256); 
+          strcpy(buffer,"1"); //add in 1 as the flag to buffer; to signify server overload 
+          strcat(buffer,">>>server-overloaded"); 
+          n = write(newsockfd, buffer, strlen(buffer));
+          bzero(buffer, 256);
+      } else {
+        //function to run the game
+        startGame(&amountOfGames, i, buffer, n, newsockfd); 
       } //end of else for amount of games
     }  //end of 0 signal to start the game
     
     //Close connection and decrement games:
     //close(newsockfd);
     amountOfGames--; 
-  }
+  } //end of large infinite while loop
   return 0;
 }
