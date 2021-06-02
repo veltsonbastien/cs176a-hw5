@@ -30,13 +30,6 @@ void delay(int number_of_seconds) {
 
 int main(int argc, char * argv[]) {
 
-  //First thing, Client asks if user wants to join game: 
-  int yon;
-  printf(">>>Ready to start game? (y/n): ");
-  yon = getchar( );
-  
-  //only start the connection and all that if they say yes: 
-  if(yon == 'y'){
     int sockfd, portno, n;
     struct sockaddr_in serv_addr;
     struct hostent * server;
@@ -64,7 +57,31 @@ int main(int argc, char * argv[]) {
     if (connect(sockfd, (struct sockaddr * ) & serv_addr, sizeof(serv_addr)) < 0)
         error("ERROR connecting");
 
+   //FIRST, probe the network checking if there are available spots 
+    buffer[0] = '7';
+    buffer[1] = ' '; 
+    buffer[2] = '\0';
+    n = write(sockfd, buffer, strlen(buffer));
+    if (n < 0) error("ERROR writing to socket");
+    //now clear out buffer
+    bzero(buffer, 256); 
+    //read the response
+    n = read(sockfd, buffer, 255);
+   if(buffer[0] == '1'){ //this means that it's full so we print out the overload message and end the connection
+        memmove(buffer, buffer+1, strlen(buffer)); //inspired from: https://stackoverflow.com/questions/4295754/how-to-remove-first-character-from-c-string
+        printf("%s\n", buffer); //print out the buffer 
+        bzero(buffer, 256); //clear out the buffer
+        close(sockfd); //end the connection
+        return 0; //end the program
+   } else { //else, we can continue 
    bzero(buffer, 256);
+   //First thing, Client asks if user wants to join game: 
+    int yon;
+    printf(">>>Ready to start game? (y/n): ");
+    yon = getchar( );
+    
+    //only start the connection and all that if they say yes: 
+    if(yon == 'y'){
     //AT THIS POINT, EVERYTHING FOR CONNECTION HAS BEEN ESTABLISHED, send over the 0 message to the server  
     buffer[0] = '0';
     buffer[1] = ' '; 
@@ -76,10 +93,6 @@ int main(int argc, char * argv[]) {
     if (n < 0) error("ERROR reading from socket");
     //While there is still something to read on the buffer:
     while (strlen(buffer) > 0 ) { 
-        if(strcmp(buffer, "server-overloaded") == 0){ //If the message is an overload error, end the connection
-         close(sockfd);
-         return 0;
-        }
         //If runtime continues, now check the flag:
         if(buffer[0] == '0'){
             //in this case, we know we are still running game logic 
@@ -154,9 +167,8 @@ int main(int argc, char * argv[]) {
         bzero(buffer, 256);
         n = read(sockfd, buffer, 255);
         //if (n < 0) error("ERROR reading from socket");
-    }
-    //Close the socket:
-    //close(sockfd);
-  } //end of if yon is y
+     }
+    } //end of if yon is y
+   } //end of big else showing that things are fine
   return 0;
 }

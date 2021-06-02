@@ -207,22 +207,29 @@ srand(0);
     if (newsockfd < 0)
       error("ERROR on accept");
     bzero(buffer, 256);
-    n = read(newsockfd, buffer, 255); //read in from the new connection, expecting a "0" to start the game
+    n = read(newsockfd, buffer, 255); //read in from the new connection, expecting a "7" to probe the network
     if (n < 0) error("ERROR reading from socket");
-    //buffer[strlen(buffer) - 1] = '\0'; //Clean up buffer
-    if(buffer[0] == '0'){ //only start the game once you got that 
-      //This keeps track of the amount of games: 
-      if(amountOfGames >= 3){ //if more than 3 games, print error and close conection 
+    //First listen for connections probing for space:
+    if(buffer[0] == '7'){
+        if(amountOfGames >= 3){ //if more than 3 games, print error and close conection 
           bzero(buffer, 256); 
           strcpy(buffer,"1"); //add in 1 as the flag to buffer; to signify server overload 
           strcat(buffer,">>>server-overloaded"); 
           n = write(newsockfd, buffer, strlen(buffer));
           bzero(buffer, 256);
-      } else {
-        //function to run the game
-        startGame(&amountOfGames, i, buffer, n, newsockfd); 
-      } //end of else for amount of games
-    }  //end of 0 signal to start the game
+       }else{
+        bzero(buffer, 256); 
+        strcpy(buffer,"5"); //add in 5 as the flag to buffer; to signify no server overload 
+        n = write(newsockfd, buffer, strlen(buffer));
+        bzero(buffer, 256); //clear the buffer and re-read
+        n = read(newsockfd, buffer, 255); //read in from the new connection, expecting a "0" to start the game
+        if(buffer[0] == '0'){ //only start the game once you got that 
+          //This keeps track of the amount of games: 
+            //function to run the game
+            startGame(&amountOfGames, i, buffer, n, newsockfd); 
+        }  //end of 0 signal to start the game
+       }
+    }//end of connection probe for space
     
     //Close connection and decrement games:
     //close(newsockfd);
